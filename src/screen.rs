@@ -1216,7 +1216,9 @@ impl Screen {
 
             // Now actually output stuff.
             loop {
-                let done = j >= o_line(self, i).len();
+                // The character we are about to output, if any, and its width.
+                let ch = (j < o_line(self, i).len()).then(|| o_line(self, i).char_at(j));
+                let width = ch.map_or(0, wcwidth_rendered_min_0);
                 // Clear the screen if we have not done so yet.
                 // If we are about to output into the last column, clear the screen first. If we clear
                 // the screen after we output into the last column, it can erase the last character due
@@ -1224,7 +1226,7 @@ impl Screen {
                 // wrapping.
                 if should_clear_screen_this_line
                     && !has_cleared_screen
-                    && (done || Some(j + 1) == screen_width)
+                    && (ch.is_none() || screen_width.is_some_and(|sw| current_width + width >= sw))
                 {
                     set_color(self, HighlightSpec::new());
                     self.r#move(current_width, i);
@@ -1235,16 +1237,14 @@ impl Screen {
                     }
                     has_cleared_screen = true;
                 }
-                if done {
+                let Some(ch) = ch else {
                     break;
-                }
+                };
 
                 self.handle_soft_wrap(current_width, i);
                 self.r#move(current_width, i);
                 let color = o_line(self, i).color_at(j);
                 set_color(self, color);
-                let ch = o_line(self, i).char_at(j);
-                let width = wcwidth_rendered_min_0(ch);
                 self.with_buffered_output(|zelf| zelf.write_char(ch, width));
                 current_width += width;
                 j += 1;
