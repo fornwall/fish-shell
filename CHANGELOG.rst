@@ -15,6 +15,7 @@ Interactive improvements
 - Fixed a glitch in the initial prompt when the terminal is resized during early startup (:issue:`12995`).
 - Fixed indentation when displaying a multiline command in a transient prompt (:issue:`13012`).
 - Completing a ref for ``git range-diff`` now appends the ``..`` range operator, so pressing :kbd:`Tab` again completes the other end of the range.
+- Fixed the last character of a command line containing a wide character (such as an emoji) disappearing when the command line shrinks to fill the last column exactly, for example after deleting text before an emoji that had wrapped to the next line.
 
 Scripting improvements
 ----------------------
